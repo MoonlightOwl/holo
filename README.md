@@ -24,7 +24,7 @@ holo-view filename[.3d/.3dx] [scale]
 ## Installation
 Installation consists of two easy steps:
 
-**1)** Obtain an HPM package manager copy.
+**1)** Obtain a HPM package manager copy.
 
 If you already have one - you can skip this step. Otherwise you can use internet card and this command:
 
@@ -40,7 +40,7 @@ hpm install holo
 
 That's all. Now you can use `holo` and `holo-view` commands. The program files are downloaded and installed to `/usr/bin/` folder.
 
-*NOTE*: you can specify package version when installing/ For example:
+*NOTE*: you can specify package version when installing. For example:
 
 ```sh
 hpm install holo@0.7.1
@@ -54,7 +54,7 @@ It is easier to parse, and uses around *19KiB* per model.
 Since `0.7.0` version, the editor supports a new file format: `*.3dx`. 
 It features *x15* compression rate (thanks Zer0Galaxy for helping with this).
 
-Both editor and viewer of new versions supports the old `*.3d` format for backward compatibility.
+Both editor and viewer of new versions support the old `*.3d` format for backward compatibility.
 
 ## Changelog
 
@@ -76,4 +76,4 @@ Both editor and viewer of new versions supports the old `*.3d` format for backwa
 * Additional hotkeys
 
 ### 0.5.5
-First viable version of editor.
+First viable version of editor
