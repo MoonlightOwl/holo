@@ -65,7 +65,7 @@ Both editor and viewer of new versions support the old `*.3d` format for backwar
 
 ### 0.7.0
 * Tier 2 GPU support
-* New `*.3dx` file format with insane compression rate (thanks Zer0Galaxy :))
+* New `*.3dx` file format with insane compression rate
 * Improved UI interaction
 * Localization table
 * Fixed old bugs, added a bunch of new ones
@@ -77,3 +77,14 @@ Both editor and viewer of new versions support the old `*.3d` format for backwar
 
 ### 0.5.5
 First viable version of editor
+
+## Special thanks
+I want to thank the following people for contributing to the project:
+
+**Zer0Galaxy**, for awesome compression algorithm,
+
+**NEO**, for help with building first version of the project,
+
+and **everyone else** who provided me bug reports and great feedback.
+
+I appreciate this.
