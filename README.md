@@ -21,6 +21,31 @@ Command syntax:
 holo-view filename[.3d/.3dx] [scale]
 ```
 
+## Installation
+Installation consists of two easy steps:
+
+**1)** Obtain an HPM package manager copy.
+
+If you already have one - you can skip this step. Otherwise you can use internet card and this command:
+
+```sh
+pastebin run vf6upeAN
+```
+
+**2)** Download `holo` package from [repository](https://hel.fomalhaut.me/#packages/holo):
+
+```sh
+hpm install holo
+```
+
+That's all. Now you can use `holo` and `holo-view` commands. The program files are downloaded and installed to `/usr/bin/` folder.
+
+*NOTE*: you can specify package version when installing/ For example:
+
+```sh
+hpm install holo@0.7.1
+```
+
 ## Hologram formats
 The basic hologram format is `*.3d` file.
 
