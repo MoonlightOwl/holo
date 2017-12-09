@@ -1016,7 +1016,7 @@ if HEIGHT < HOLOW/2 then
   error(loc.TOO_LOW_RESOLUTION_ERROR)
 elseif HEIGHT < HOLOW+2 then
   com.screen.setPrecise(true)
-  if not com.screen.isPrecise() then error(loc.TOO_LOW_SCREEN_TIER) end
+  if not com.screen.isPrecise() then error(loc.TOO_LOW_SCREEN_TIER_ERROR) end
   FULLSIZE = false
   MENUX = HOLOW + 2
   color.gray = color.lightgray
