@@ -9,6 +9,7 @@ local fs = require('filesystem')
 local shell = require('shell')
 local com = require('component')
 local gpu = com.gpu
+local bit32 = require('bit32')
 
 --     Colors     --
 local color = {
@@ -340,10 +341,13 @@ end
 -- ============================================== B U T T O N S ============================================== --
 local Button = {}
 Button.__index = Button
-function Button.new(func, x, y, text, fore, back, width, nu)
+function Button.new(func, x, y, text, fore, back, width, nu, noPadding)
   self = setmetatable({}, Button)
- 
-  self.form = '[ '
+  if noPadding then
+    self.form = '['
+  else
+    self.form = '[ '
+  end
   if width == nil then width = 0
     else width = (width - unicode.len(text))-4 end
   for i=1, math.floor(width/2) do
@@ -353,7 +357,11 @@ function Button.new(func, x, y, text, fore, back, width, nu)
   for i=1, math.ceil(width/2) do
     self.form = self.form.. ' '
   end
-  self.form = self.form..' ]'
+  if noPadding then
+    self.form = self.form..']'
+  else
+    self.form = self.form..' ]'
+  end
  
   self.func = func
  
@@ -389,8 +397,8 @@ function Button:click(x, y)
   return false
 end
 
-local function buttonNew(buttons, func, x, y, text, fore, back, width, notupdate)
-  local button = Button.new(func, x, y, text, fore, back, width, notupdate)
+local function buttonNew(buttons, func, x, y, text, fore, back, width, notupdate, noPadding)
+  local button = Button.new(func, x, y, text, fore, back, width, notupdate, noPadding)
   table.insert(buttons, button)
   return button
 end
@@ -1007,7 +1015,28 @@ local function loadHologram()
     end
   end
 end
-
+local function copyLayer(dst)
+  for x = 1, view.width do
+    for y = 1, view.height do
+      local vsx, vsy, vsz = project(x, y, layer, view)
+      local vdx, vdy, vdz = project(x, y, dst, view)
+      local av = get(vsx,vsy,vsz)
+      set(vdx,vdy,vdz,av)
+    end
+  end
+end
+local function copyLayerNext()
+  if layer < view.depth then
+    copyLayer(layer+1)
+    nextLayer()
+  end
+end
+local function copyLayerPrev()
+  if layer > 1 then
+    copyLayer(layer-1)
+    prevLayer()
+  end
+end
 
 -- =========================================== M A I N   C Y C L E =========================================== --
 -- initialization
@@ -1052,8 +1081,10 @@ if FULLSIZE then
   buttonNew(buttons, prevGhost, MENUX+1, 24, loc.BELOW_BUTTON, color.fore, color.info, 6)
   buttonNew(buttons, nextGhost, MENUX+10, 24, loc.ABOVE_BUTTON, color.fore, color.info, 6)
 
-  buttonNew(buttons, clearLayer, MENUX+1, 26, loc.CLEAR_BUTTON, color.fore, color.info, BUTTONW)
-  buttonNew(buttons, fillLayer, MENUX+2+BUTTONW, 26, loc.FILL_BUTTON, color.fore, color.info, BUTTONW)
+  buttonNew(buttons, clearLayer, MENUX+1, 26, loc.CLEAR_BUTTON, color.fore, color.info, 0,nil,true)
+  buttonNew(buttons, fillLayer, MENUX+12, 26, loc.FILL_BUTTON, color.fore, color.info, 0,nil,true)
+  buttonNew(buttons, copyLayerNext, MENUX+21, 26, "+", color.back, color.gold,nil,nil,true)
+  buttonNew(buttons, copyLayerPrev, MENUX+25, 26, "-", color.back, color.gold,nil,nil,true)
 
   buttonNew(buttons, drawHologram, MENUX+9, 30, loc.TO_PROJECTOR, color.back, color.gold, 16)
   buttonNew(buttons, saveHologram, MENUX+1, 33, loc.SAVE_BUTTON, color.fore, color.help, BUTTONW)
@@ -1064,9 +1095,12 @@ else
   buttonNew(buttons, drawLayer, MENUX+9, 6, loc.REFRESH_BUTTON, color.back, color.gold, BUTTONW)
   buttonNew(buttons, prevLayer, MENUX+1, 9, '-', color.fore, color.info, 5)
   buttonNew(buttons, nextLayer, MENUX+7, 9, '+', color.fore, color.info, 5)
-  buttonNew(buttons, setTopView, MENUX+1, 11, loc.TOP_BUTTON, color.fore, color.info, 8)
-  buttonNew(buttons, setFrontView, MENUX+10, 12, loc.FRONT_BUTTON, color.fore, color.info, 8)
-  buttonNew(buttons, setSideView, MENUX+20, 13, loc.SIDE_BUTTON, color.fore, color.info, 8)
+  buttonNew(buttons, setTopView, MENUX+1, 11, loc.TOP_BUTTON, color.fore, color.info, 0, nil, true)
+  buttonNew(buttons, setFrontView, MENUX+10, 11, loc.FRONT_BUTTON, color.fore, color.info, 0, nil, true)
+  buttonNew(buttons, setSideView, MENUX+20, 11, loc.SIDE_BUTTON, color.fore, color.info, 0, nil, true)
+  buttonNew(buttons, copyLayerNext, MENUX+1, 12, "+", color.back, color.gold,nil,nil,true)
+  buttonNew(buttons, copyLayerPrev, MENUX+5, 12, "-", color.back, color.gold,nil,nil,true)
+
 
   buttonNew(buttons, clearLayer, MENUX+1, 15, loc.CLEAR_BUTTON, color.fore, color.info, BUTTONW)
   buttonNew(buttons, fillLayer, MENUX+14, 15, loc.FILL_BUTTON, color.fore, color.info, BUTTONW)
