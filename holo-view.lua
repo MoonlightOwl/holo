@@ -5,6 +5,7 @@
 local fs = require('filesystem')
 local shell = require('shell')
 local com = require('component')
+local bit32 = require('bit32')
 local args = { ... }
 
 local loc = {

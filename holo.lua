@@ -8,6 +8,7 @@ local term = require('term')
 local fs = require('filesystem')
 local shell = require('shell')
 local com = require('component')
+local bit32 = require('bit32')
 local gpu = com.gpu
 
 --     Colors     --
