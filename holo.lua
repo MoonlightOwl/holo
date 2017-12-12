@@ -1020,8 +1020,9 @@ local function copyLayer(dst)
     for y = 1, view.height do
       local vsx, vsy, vsz = project(x, y, layer, view)
       local vdx, vdy, vdz = project(x, y, dst, view)
-      local av = get(vsx,vsy,vsz)
-      set(vdx,vdy,vdz,av)
+      local sv = get(vsx,vsy,vsz)
+      local dv = get(vdx,vdy,vdz)
+      set(vdx,vdy,vdz,(sv == 0 and dv or nil))
     end
   end
 end
