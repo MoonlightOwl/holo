@@ -135,8 +135,8 @@ end
 local holo = {}
 
 local function getIndex(x, y, z)
-  if x < 1 or y < 1 or z < 1 then return - 1 end
-    return (x - 1) * HOLOW + (y - 1) * HOLOW + (z - 1) * HOLOH
+  if x < 1 or y < 1 or z < 1 then return -1 end
+    return math.pow(HOLOW, 2) * (y - 1) + (x + (z - 1) * HOLOW)
 end
 
 local function set(x, y, z, value)
@@ -147,7 +147,7 @@ local function set(x, y, z, value)
 end
 local function get(x, y, z)
   local index = getIndex(x, y, z)
-  if index < 0 then return 0 end
+  if index < 0 or not holo[index] then return 0 end
   return holo[index]
 end
 
