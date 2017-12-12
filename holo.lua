@@ -133,17 +133,22 @@ end
 
 -- ========================================= H O L O G R A P H I C S ========================================= --
 local holo = {}
+
+local function getIndex(x, y, z)
+  if x < 1 or y < 1 or z < 1 then return - 1 end
+    return (x - 1) * HOLOW + (y - 1) * HOLOW + (z - 1) * HOLOH
+end
+
 local function set(x, y, z, value)
-  if holo[x] == nil then holo[x] = {} end
-  if holo[x][y] == nil then holo[x][y] = {} end
-  holo[x][y][z] = value
+  local index = getIndex(x, y, z)
+  if index >= 0 then
+    holo[index] = value
+  end
 end
 local function get(x, y, z)
-  if holo[x] ~= nil and holo[x][y] ~= nil and holo[x][y][z] ~= nil then 
-    return holo[x][y][z]
-  else
-    return 0
-  end
+  local index = getIndex(x, y, z)
+  if index < 0 then return 0 end
+  return holo[index]
 end
 
 local writer = {}
