@@ -140,7 +140,7 @@ local function getIndex(x, y, z)
 end
 local function set(x, y, z, value)
   local index = getIndex(x, y, z)
-  if value and value ~= 0 then
+  if value ~= holo[index] then
     holo[index] = value
   end
 end
