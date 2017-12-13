@@ -42,13 +42,17 @@ local function getIndex(x, y, z)
 end
 local function set(x, y, z, value)
   local index = getIndex(x, y, z)
-  if value and value ~= 0 then
+  if value ~= holo[index] then
     holo[index] = value
   end
 end
 local function get(x, y, z)
   local index = getIndex(x, y, z)
   return holo[index] or 0
+end
+
+local function rgb2hex(r,g,b)
+  return r*65536+g*256+b
 end
 
 
