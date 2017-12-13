@@ -30,29 +30,25 @@ function trytofind(name)
 end
 
 -- constants
-HOLOH = 32
-HOLOW = 48
+local HOLOH = 32
+local HOLOW = 48
+local LAYERSIZE = 48 * 48
 
 -- hologram vars
-holo = {}
-colortable = {{},{},{}}
-hexcolortable = {}
-proj_scale = 1.0
+local holo = {}
 
-function set(x, y, z, value)
-  if holo[x] == nil then holo[x] = {} end
-  if holo[x][y] == nil then holo[x][y] = {} end
-  holo[x][y][z] = value
+local function getIndex(x, y, z)
+  return LAYERSIZE * (y - 1) + (x + (z - 1) * HOLOW)
 end
-function get(x, y, z)
-  if holo[x] ~= nil and holo[x][y] ~= nil and holo[x][y][z] ~= nil then 
-    return holo[x][y][z]
-  else
-    return 0
+local function set(x, y, z, value)
+  local index = getIndex(x, y, z)
+  if value and value ~= 0 then
+    holo[index] = value
   end
 end
-function rgb2hex(r,g,b)
-  return r*65536+g*256+b
+local function get(x, y, z)
+  local index = getIndex(x, y, z)
+  return holo[index] or 0
 end
 
 
