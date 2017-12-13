@@ -6,7 +6,16 @@ local fs = require('filesystem')
 local shell = require('shell')
 local com = require('component')
 local bit32 = require('bit32')
-local args = { ... }
+local args = {...}
+
+-- hologram component configuration values
+local holoCfg = {
+  holoName = 'hologram',
+  projector = nil,
+  shiftVector = nil,
+  proj_scale = nil
+}
+
 
 local loc = {
   ERROR_NO_FILENAME = "[ОШИБКА] Необходимо указать имя файла с моделью.",
@@ -14,20 +23,22 @@ local loc = {
   ERROR_INVALID_FORMAT_STRUCTURE = "[ОШИБКА] Структура файла не соответствует формату.",
   ERROR_UNABLE_TO_OPEN = "[ОШИБКА] Невозможно открыть файл: ",
   ERROR_FILE_NOT_FOUND = "[ОШИБКА] Файл не найден: ",
-  ERROR_WRONG_SCALE = "[ОШИБКА] Масштаб голограммы должен быть числом от 0.33 до 4.00",
+  ERROR_WRONG_SCALE = "[ОШИБКА] Масштаб голограммы должен быть числом от 0.33 до 3.00",
   ERROR_NO_PROJECTOR = "[ОШИБКА] Не найден проектор.",
-  DONE = "Готово. Голограмма выведена на проектор."
+  DONE = "Готово. Голограмма выведена на проектор.",
+  USAGE = "использование: holo-view <Файл голограммы>\n   [--scale,-s <Масштаб>]\n   [--projector,-p <Полный адрес проектора>]\n   [--shift_n,-sn <Сдвиг голограммы по оси n>\nпримеры:\n  holo-view my.3dx\n  holo-view my.3dx -p 03f77e2c-52e34-765-bafd-442dadcafd14 -s 3\n  holo  -s 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14 -sy 0.25 --shift_z 0.4"
 }
 
 -- ================================ H O L O G R A M S   S T U F F ================================ --
--- loading add. components
-function trytofind(name)
-  if com.isAvailable(name) then
-    return com.getPrimary(name)
-  else
-    return nil
+-- Try to load a component safely
+local function trytofind (name)
+  local result = com.proxy(name)
+  if not result and com.isAvailable(name) then
+    result = com.getPrimary(name)
   end
+  return result
 end
+holoCfg.trytofind = trytofind
 
 -- constants
 local HOLOH = 32
@@ -36,6 +47,9 @@ local LAYERSIZE = 48 * 48
 
 -- hologram vars
 local holo = {}
+local colortable = {{},{},{}}
+local hexcolortable = {}
+local proj_scale
 
 local function getIndex(x, y, z)
   return LAYERSIZE * (y - 1) + (x + (z - 1) * HOLOW)
@@ -91,7 +105,6 @@ local function loadHologram(filename)
 
   local path = shell.resolve(filename, "3dx")
   if path == nil then path = shell.resolve(filename, "3d") end
-
   if path ~= nil then
     local compressed
     if string.sub(path, -4) == '.3dx' then
@@ -160,64 +173,67 @@ local function loadHologram(filename)
       file:close()
       return true
     else
+      print(loc.USAGE)
       error(loc.ERROR_UNABLE_TO_OPEN .. filename)
     end
   else
+    print(loc.USAGE)
     error(loc.ERROR_FILE_NOT_FOUND .. filename)
   end
 end
 
 function scaleHologram(scale)
-  if scale == nil or scale < 0.33 or scale > 4 then
+  if scale == nil or scale < 0.33 or scale > 3 then
     error(loc.ERROR_WRONG_SCALE)
   end
-  proj_scale = scale
+  holoCfg.proj_scale = scale
 end
+holoCfg.scale = scaleHologram
 
 function drawHologram()
-  -- check hologram projector availability
-  h = trytofind('hologram')
-  if h ~= nil then
-    local depth = h.maxDepth()
-    -- clear projector
-    h.clear()
-    -- set projector scale
-    h.setScale(proj_scale)
-    -- send palette
-    if depth == 2 then
-      for i = 1, 3 do
-        h.setPaletteColor(i, hexcolortable[i])
-      end
-    else
-      h.setPaletteColor(1, hexcolortable[1])
+  local projector = holoCfg.projector
+  -- clear and set scale and translation
+  projector.clear()
+  if holoCfg.proj_scale then
+    projector.setScale(holoCfg.proj_scale)
+  end
+  if holoCfg.shiftVector then
+    projector.setTranslation(holoCfg.shiftVector.x, holoCfg.shiftVector.y, holoCfg.shiftVector.z)
+  end
+  -- send the palette
+  local depth = projector.maxDepth()
+  if depth == 2 then
+    for i = 1, 3 do
+      projector.setPaletteColor(i, hexcolortable[i])
     end
-    -- send voxel array
-    for x = 1, HOLOW do
-      for y = 1, HOLOH do
-        for z = 1, HOLOW do
-          n = get(x,y,z)
-          if n ~= 0 then
-            if depth == 2 then
-              h.set(x, y, z, n)
-            else
-              h.set(x, y, z, 1)
-            end
+  else
+    projector.setPaletteColor(1, hexcolortable[1])
+  end
+  -- send voxel array
+  for x = 1, HOLOW do
+    for y = 1, HOLOH do
+      for z = 1, HOLOW do
+        n = get(x,y,z)
+        if n ~= 0 then
+          if depth == 2 then
+            projector.set(x, y, z, n)
+          else
+            projector.set(x, y, z, 1)
           end
         end
-      end      
-    end
-    print(loc.DONE)
-  else
-    error(loc.ERROR_NO_PROJECTOR)
+      end
+    end      
   end
+  print(loc.DONE)
 end
 -- =============================================================================================== --
 
 -- Main part
-loadHologram(args[1])
-
-if args[2] ~= nil then
-  scaleHologram(tonumber(args[2]))
-end
+holoCfg.loc = loc
+local cli = require("holo-cli")
+cli.data = holoCfg
+holoCfg.projector = trytofind(holoCfg.holoName)
+cli.setHandler(1,loadHologram)
+cli.setHoloCfg(args)
 
 drawHologram()

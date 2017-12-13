@@ -1,2 +1,5 @@
 # IntelliJ IDEA files
 .idea/
+dt.lua
+poparse_t.lua
+shell-lua.txt

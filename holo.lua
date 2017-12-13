@@ -10,6 +10,14 @@ local shell = require('shell')
 local com = require('component')
 local bit32 = require('bit32')
 local gpu = com.gpu
+-- hologram component configuration values
+local args = {...}
+local holoCfg = {
+  holoName = 'hologram',
+  projector = nil,
+  shiftVector = nil,
+  proj_scale = nil
+}
 
 --     Colors     --
 local color = {
@@ -37,6 +45,7 @@ local keys = {
 local loc = {
   FILE_REQUEST = 'Введите сюда имя файла',
   ERROR_CAPTION = 'Ошибка',
+  ERROR_WRONG_SCALE = "Масштаб голограммы должен быть числом от 0.33 до 3.00",
   WARNING_CAPTION = 'Внимание',
   DONE_CAPTION = 'Завершено',
   PROJECTOR_UNAVAILABLE_MESSAGE = 'Проектор не подключен!',
@@ -70,19 +79,22 @@ local loc = {
   TO_PROJECTOR = 'На проектор',
   SAVE_BUTTON = 'Сохранить',
   LOAD_BUTTON = 'Загрузить',
-  NEW_FILE_BUTTON = 'Новый файл'
+  NEW_FILE_BUTTON = 'Новый файл',
+  USAGE = "использование: holo\n   [--scale,-s <Масштаб>]\n   [--projector,-p <Полный адрес проектора>]\n   [--shift_n,-sn <Сдвиг голограммы по оси n>\nпримеры:\n  holo\n  holo  --scale 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14\n  holo  -s 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14 -sy 0.25 --shift_z 0.4"
 }
 --      ****      --
 
 
 -- Try to load a component safely
-local function trytofind(name)
-  if com.isAvailable(name) then
-    return com.getPrimary(name)
-  else
-    return nil
+local function trytofind (name)
+  local result = com.proxy(name)
+  if not result and com.isAvailable(name) then
+    result = com.getPrimary(name)
   end
+  return result
 end
+holoCfg.trytofind = trytofind
+
 
 -- Constants --
 local OLDWIDTH, OLDHEIGHT = gpu.getResolution()
@@ -922,14 +934,27 @@ local function setTopView(norefresh) setView(TOP, norefresh) end
 local function setFrontView() setView(FRONT) end
 local function setSideView() setView(SIDE) end
 
+function scaleHologram(scale)
+  if scale == nil or scale < 0.33 or scale > 3 then
+    error(loc.ERROR_WRONG_SCALE)
+  end
+  holoCfg.proj_scale = scale
+end
+holoCfg.scale = scaleHologram
+
 local function drawHologram()
-  -- check for a projector availability
-  local projector = trytofind('hologram')
-  if projector ~= nil then
-    local depth = projector.maxDepth()
-    -- clean him up
+  if holoCfg.projector ~= nil then
+    local projector = holoCfg.projector
+    -- clear and set scale and translation
     projector.clear()
+    if holoCfg.proj_scale then
+      projector.setScale(holoCfg.proj_scale)
+    end
+    if holoCfg.shiftVector then
+      projector.setTranslation(holoCfg.shiftVector.x, holoCfg.shiftVector.y, holoCfg.shiftVector.z)
+    end
     -- send the palette
+    local depth = projector.maxDepth()
     if depth == 2 then
       for i=1, 3 do
         projector.setPaletteColor(i, hexcolortable[i])
@@ -1025,7 +1050,7 @@ local function copyLayer(dst)
       local vdx, vdy, vdz = project(x, y, dst, view)
       local sv = get(vsx,vsy,vsz)
       local dv = get(vdx,vdy,vdz)
-      if dv == 0 then
+      if sv~=0 then
         dv = sv
       end
       set(vdx,vdy,vdz,dv)
@@ -1142,6 +1167,13 @@ else
   tb_file = textboxNew(textboxes, function() return true end, setFilename, MENUX+1, 19, WIDTH-MENUX-2, '', loc.FILE_REQUEST)
 end
 
+
+holoCfg.loc = loc
+local cli = require("holo-cli")
+holoCfg.projector = trytofind(holoCfg.holoName)
+cli.data = holoCfg
+cli.setHoloCfg(args)
+
 mainScreen()
 moveSelector(1)
 
@@ -1167,6 +1199,7 @@ while running do
     else
       if name == 'touch' then
         -- check the GUI
+
         buttonsClick(buttons, math.ceil(x), math.ceil(y))
         textboxesClick(textboxes, math.ceil(x), math.ceil(y))
         -- select a color
