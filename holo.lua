@@ -140,7 +140,7 @@ local function getIndex(x, y, z)
 end
 local function set(x, y, z, value)
   local index = getIndex(x, y, z)
-  if value ~= holo[index] then
+  if holo[index] ~= nil or (value ~= nil and value ~= 0) then
     holo[index] = value
   end
 end
@@ -1025,7 +1025,10 @@ local function copyLayer(dst)
       local vdx, vdy, vdz = project(x, y, dst, view)
       local sv = get(vsx,vsy,vsz)
       local dv = get(vdx,vdy,vdz)
-      set(vdx,vdy,vdz,(sv == 0 and dv or nil))
+      if dv == 0 then
+        dv = sv
+      end
+      set(vdx,vdy,vdz,dv)
     end
   end
 end

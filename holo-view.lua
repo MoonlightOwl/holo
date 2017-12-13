@@ -42,7 +42,7 @@ local function getIndex(x, y, z)
 end
 local function set(x, y, z, value)
   local index = getIndex(x, y, z)
-  if value ~= holo[index] then
+  if holo[index] ~= nil or (value ~= nil and value ~= 0) then
     holo[index] = value
   end
 end
