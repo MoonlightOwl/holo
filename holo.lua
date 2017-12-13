@@ -89,6 +89,7 @@ local OLDWIDTH, OLDHEIGHT = gpu.getResolution()
 local WIDTH, HEIGHT = gpu.maxResolution()
 local FULLSIZE = true
 local HOLOW, HOLOH = 48, 32        -- hologram size
+local LAYERSIZE = 48 * 48          -- layer size for indexing
 local MENUX = HOLOW*2+5            -- right panel offset
 local BUTTONW = 12                 -- standart button width
 local GRIDX, GRIDY = 3, 2          -- grid offset
@@ -135,20 +136,17 @@ end
 local holo = {}
 
 local function getIndex(x, y, z)
-  if x < 1 or y < 1 or z < 1 then return -1 end
-    return math.pow(HOLOW, 2) * (y - 1) + (x + (z - 1) * HOLOW)
+  return LAYERSIZE * (y - 1) + (x + (z - 1) * HOLOW)
 end
-
 local function set(x, y, z, value)
   local index = getIndex(x, y, z)
-  if index >= 0 then
+  if value and value ~= 0 then
     holo[index] = value
   end
 end
 local function get(x, y, z)
   local index = getIndex(x, y, z)
-  if index < 0 or not holo[index] then return 0 end
-  return holo[index]
+  return holo[index] or 0
 end
 
 local writer = {}
