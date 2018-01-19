@@ -10,6 +10,7 @@ local shell = require('shell')
 local com = require('component')
 local bit32 = require('bit32')
 local gpu = com.gpu
+local projectorPicked
 
 --     Colors     --
 local color = {
@@ -77,10 +78,11 @@ local loc = {
 
 -- Try to load a component safely
 local function trytofind(name)
-  if com.isAvailable(name) then
-    return com.getPrimary(name)
+  name = tostring(name)
+  if com.isAvailable(holoName) then
+    return com.getPrimary(holoName)
   else
-    return nil
+    return com.proxy(tostring(name))
   end
 end
 
@@ -924,7 +926,7 @@ local function setSideView() setView(SIDE) end
 
 local function drawHologram()
   -- check for a projector availability
-  local projector = trytofind('hologram')
+  local projector = projectorPicked or trytofind('hologram')
   if projector ~= nil then
     local depth = projector.maxDepth()
     -- clean him up
@@ -1140,6 +1142,13 @@ else
   tb_blue = textboxNew(textboxes, isNumber, changeBlue, MENUX+23, 5, 6, '0')
   tb_layer = textboxNew(textboxes, correctLayer, setLayer, MENUX+13, 9, WIDTH-MENUX-14, '1')
   tb_file = textboxNew(textboxes, function() return true end, setFilename, MENUX+1, 19, WIDTH-MENUX-2, '', loc.FILE_REQUEST)
+end
+
+local args = shell.parse(...)
+
+for _, v in ipairs(args) do
+  projectorPicked = trytofind(v)
+  if projectorPicked then break end
 end
 
 mainScreen()

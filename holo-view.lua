@@ -7,6 +7,8 @@ local shell = require('shell')
 local com = require('component')
 local bit32 = require('bit32')
 local args = { ... }
+local projectorPicked
+
 
 local loc = {
   ERROR_NO_FILENAME = "[ОШИБКА] Необходимо указать имя файла с моделью.",
@@ -21,11 +23,12 @@ local loc = {
 
 -- ================================ H O L O G R A M S   S T U F F ================================ --
 -- loading add. components
-function trytofind(name)
-  if com.isAvailable(name) then
-    return com.getPrimary(name)
+local function trytofind(name)
+  name = tostring(name)
+  if com.isAvailable(holoName) then
+    return com.getPrimary(holoName)
   else
-    return nil
+    return com.proxy(tostring(name))
   end
 end
 
@@ -36,6 +39,9 @@ local LAYERSIZE = 48 * 48
 
 -- hologram vars
 local holo = {}
+local colortable = {{},{},{}}
+local hexcolortable = {}
+local proj_scale = 1.0
 
 local function getIndex(x, y, z)
   return LAYERSIZE * (y - 1) + (x + (z - 1) * HOLOW)
@@ -168,7 +174,7 @@ local function loadHologram(filename)
 end
 
 function scaleHologram(scale)
-  if scale == nil or scale < 0.33 or scale > 4 then
+  if scale < 0.33 or scale > 4 then
     error(loc.ERROR_WRONG_SCALE)
   end
   proj_scale = scale
@@ -176,7 +182,7 @@ end
 
 function drawHologram()
   -- check hologram projector availability
-  h = trytofind('hologram')
+  local h = projectorPicked or trytofind('hologram')
   if h ~= nil then
     local depth = h.maxDepth()
     -- clear projector
@@ -217,7 +223,15 @@ end
 loadHologram(args[1])
 
 if args[2] ~= nil then
-  scaleHologram(tonumber(args[2]))
+  local scale = tonumber(args[2])
+  if scale then
+    scaleHologram(scale)
+  end
+end
+
+for _, v in ipairs(args) do
+  projectorPicked = com.proxy(v)
+  if projectorPicked then break end
 end
 
 drawHologram()
