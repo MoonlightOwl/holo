@@ -6,6 +6,7 @@ local fs = require('filesystem')
 local shell = require('shell')
 local com = require('component')
 local bit32 = require('bit32')
+local cli = require("holo-cli")
 local args = {...}
 
 -- hologram component configuration values
@@ -26,7 +27,7 @@ local loc = {
   ERROR_WRONG_SCALE = "[ОШИБКА] Масштаб голограммы должен быть числом от 0.33 до 3.00",
   ERROR_NO_PROJECTOR = "[ОШИБКА] Не найден проектор.",
   DONE = "Готово. Голограмма выведена на проектор.",
-  USAGE = "использование: holo-view <Файл голограммы>\n   [--scale,-s <Масштаб>]\n   [--projector,-p <Полный адрес проектора>]\n   [--shift_n,-sn <Сдвиг голограммы по оси n>\nпримеры:\n  holo-view my.3dx\n  holo-view my.3dx -p 03f77e2c-52e34-765-bafd-442dadcafd14 -s 3\n  holo  -s 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14 -sy 0.25 --shift_z 0.4"
+  USAGE = "Использование: holo-view <Файл голограммы>\n   [--scale,-s <Масштаб>]\n   [--projector,-p <Полный адрес проектора>]\n   [--shift_n,-sn <Сдвиг голограммы по оси n>\nпримеры:\n  holo-view my.3dx\n  holo-view my.3dx -p 03f77e2c-52e34-765-bafd-442dadcafd14 -s 3\n  holo  -s 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14 -sy 0.25 --shift_z 0.4"
 }
 
 -- ================================ H O L O G R A M S   S T U F F ================================ --
@@ -230,7 +231,6 @@ end
 
 -- Main part
 holoCfg.loc = loc
-local cli = require("holo-cli")
 cli.data = holoCfg
 holoCfg.projector = trytofind(holoCfg.holoName)
 cli.setHandler(1,loadHologram)

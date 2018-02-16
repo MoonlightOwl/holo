@@ -9,6 +9,7 @@ local fs = require('filesystem')
 local shell = require('shell')
 local com = require('component')
 local bit32 = require('bit32')
+local cli = require("holo-cli")
 local gpu = com.gpu
 -- hologram component configuration values
 local args = {...}
@@ -80,7 +81,7 @@ local loc = {
   SAVE_BUTTON = 'Сохранить',
   LOAD_BUTTON = 'Загрузить',
   NEW_FILE_BUTTON = 'Новый файл',
-  USAGE = "использование: holo\n   [--scale,-s <Масштаб>]\n   [--projector,-p <Полный адрес проектора>]\n   [--shift_n,-sn <Сдвиг голограммы по оси n>\nпримеры:\n  holo\n  holo  --scale 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14\n  holo  -s 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14 -sy 0.25 --shift_z 0.4"
+  USAGE = "Использование: holo\n   [--scale,-s <Масштаб>]\n   [--projector,-p <Полный адрес проектора>]\n   [--shift_n,-sn <Сдвиг голограммы по оси n>\nпримеры:\n  holo\n  holo  --scale 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14\n  holo  -s 3 -p 03f77e2c-52e34-765-bafd-442dadcafd14 -sy 0.25 --shift_z 0.4"
 }
 --      ****      --
 
@@ -1169,7 +1170,6 @@ end
 
 
 holoCfg.loc = loc
-local cli = require("holo-cli")
 holoCfg.projector = trytofind(holoCfg.holoName)
 cli.data = holoCfg
 cli.setHoloCfg(args)
