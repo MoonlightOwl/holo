@@ -79,8 +79,8 @@ local loc = {
 -- Try to load a component safely
 local function trytofind(name)
   name = tostring(name)
-  if com.isAvailable(holoName) then
-    return com.getPrimary(holoName)
+  if com.isAvailable(name) then
+    return com.getPrimary(name)
   else
     return com.proxy(tostring(name))
   end
